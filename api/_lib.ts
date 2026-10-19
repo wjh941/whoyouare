@@ -104,10 +104,20 @@ export async function kv(...args: (string | number)[]): Promise<string | null> {
       },
       body: JSON.stringify(args),
     })
-    if (!res.ok) return null
-    const data = (await res.json()) as { result?: string | null }
-    return data.result ?? null
-  } catch {
+    if (!res.ok) {
+      // 诊断:把 HTTP 层失败原因写进运行时日志(Vercel Logs 可见)
+      console.error('[kv] http', res.status, args[0], await res.text().catch(() => ''))
+      return null
+    }
+    const data = (await res.json()) as { result?: string | number | null; error?: string }
+    // Upstash 命令级错误(如 WRONGTYPE)可能随 200 返回 {"error": "..."}
+    if (data.error) {
+      console.error('[kv] cmd', args[0], '→', data.error)
+      return null
+    }
+    return (data.result ?? null) as string | null
+  } catch (e) {
+    console.error('[kv] fetch fail', args[0], e instanceof Error ? e.message : e)
     return null
   }
 }
