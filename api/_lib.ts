@@ -79,12 +79,13 @@ export function safeEqual(a: string, b: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Upstash Redis(REST):Vercel KV 市场插件会自动注入 KV_REST_API_URL/TOKEN。
+// Upstash Redis(REST):Vercel KV 市场插件注入 KV_REST_API_URL/TOKEN;
+// 走 Upstash 市场入口创建时注入 UPSTASH_REDIS_REST_URL/TOKEN。两者都认。
 // 未配置时服务端验证自动降级,前端回落本地哈希比对。
 // ---------------------------------------------------------------------------
 
-const KV_URL = (process.env.KV_REST_API_URL || '').trim().replace(/\/$/, '')
-const KV_TOKEN = (process.env.KV_REST_API_TOKEN || '').trim()
+const KV_URL = (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '').trim().replace(/\/$/, '')
+const KV_TOKEN = (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '').trim()
 
 export function kvConfigured(): boolean {
   return KV_URL !== '' && KV_TOKEN !== ''
