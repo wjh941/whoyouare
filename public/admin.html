@@ -294,6 +294,7 @@ async function api(action, payload) {
   if (!res.ok) {
     const MAP = {
       server_verification_disabled: 'KV 未配置:去 Vercel 项目 → Storage 创建 KV,并配置 ADMIN_KEY',
+      kv_unreachable: 'KV 连不上(URL/令牌不对或已轮换):去 Upstash 控制台复制 REST URL + TOKEN,在 Vercel 加 UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN 两条 Secret,然后 Redeploy',
       no_stock: '库存空了,先「生成补码」',
       admin_not_configured: '服务端还没配 ADMIN_KEY 环境变量',
       template_missing_code_placeholder: '模板里必须有 {code} 占位符',
@@ -318,11 +319,12 @@ async function tryLogin(key, silent) {
   $('gateErr').textContent = ''
   $('gateBtn').disabled = true
   try {
-    await api('ping')
+    const st = await api('ping')
     try { localStorage.setItem(KEY_STORE, key) } catch (e) { /* ignore */ }
     $('gate').classList.add('hidden')
     $('main').classList.remove('hidden')
-    $('connDot').className = 'dot on'
+    $('connDot').className = st.kv ? 'dot on' : 'dot off'
+    if (!st.kv) toast('KV 未连通:生成/发货不可用,先修环境变量')
     await refresh()
   } catch (e) {
     if (String(e.message).indexOf('密钥不对') === -1 && !$('main').classList.contains('hidden')) {
