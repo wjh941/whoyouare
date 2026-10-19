@@ -16,11 +16,24 @@ const COPY: Record<CodeSeries, { title: string; product: string; perks: string[]
     product: '「暴富体质·完整版兑换码」',
     perks: ['暴富人格侧写（动态分析你的决策模式）', '平行暴富时间表（选对全对的你，含逐题解析）', '完整错过清单', '陷阱题逐题深挖', '同开局通关秘籍', '改命模拟器 + 账本先生逐年底账'],
     ph: 'CF-XXXX-XXXX-XXXX-XXXX'
+  },
+  rl: {
+    title: '解锁关系反应炉·双人合盘完整报告',
+    product: '「关系反应炉·双人合盘兑换码」',
+    perks: ['化学反应指数深度解析', '关系雷区 + 陷阱题逐题拆弹建议', '危险实验（按你们的开局环境定制）', '专属反应式命名 + 逐题反应记录', '双人合盘高清海报（暗金实验风）'],
+    ph: 'RL-XXXX-XXXX-XXXX-XXXX'
+  },
+  da: {
+    title: '解密第43号档案·完整观察报告',
+    product: '「第43号档案·完整观察报告兑换码」',
+    perks: ['观察员全部批注（含管理员私章）', '《你被观察的第43天》续篇档案', '拒答事件/读取档案事件调查卷宗（如有）', '逃逸事件全程回放（仅逃逸样本可见）', '完整档案高清海报（磷光终端风）'],
+    ph: 'DA-XXXX-XXXX-XXXX-XXXX'
   }
 }
 
 export default function Unlock({ params }: { params: URLSearchParams }) {
-  const series: CodeSeries = params.get('p') === 'cf' ? 'cf' : 'hid'
+  const p = params.get('p')
+  const series: CodeSeries = p === 'cf' ? 'cf' : p === 'rl' ? 'rl' : p === 'da' ? 'da' : 'hid'
   const copy = COPY[series]
   const [code, setCode] = useState('')
   const [err, setErr] = useState('')

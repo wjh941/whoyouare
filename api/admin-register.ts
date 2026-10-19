@@ -11,11 +11,15 @@
 import {
   clientIp,
   corsHeaders,
+  isCodeSeries,
   json,
   kv,
   kvConfigured,
+  kvNum,
+  kvPipe,
   normalizeCode,
   overLimit,
+  poolIndexKey,
   poolKey,
   safeEqual,
   sha256Hex,
@@ -46,20 +50,29 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: 'invalid_json' }, 400, origin)
   }
   const series = body.series as CodeSeries
-  if (series !== 'hid' && series !== 'cf') return json({ error: 'invalid_series' }, 400, origin)
+  if (!isCodeSeries(series)) return json({ error: 'invalid_series' }, 400, origin)
   const codes = Array.isArray(body.codes) ? body.codes.slice(0, MAX_BATCH) : []
   if (!codes.length) return json({ error: 'codes_required' }, 400, origin)
 
-  // 码池登记幂等:重复注册同一码无害(SET 覆盖同值);激活状态存另一命名空间,不受影响
+  // 码池登记幂等:重复注册同一码无害(SET 覆盖同值);激活状态存另一命名空间,不受影响。
+  // 同步维护 poolidx 索引,发码台库存(SCARD)才能统计到脚本注册的码。
   let registered = 0
   let invalid = 0
   for (const raw of codes) {
     const n = normalizeCode(String(raw || ''))
     if (n.length < 8) { invalid += 1; continue }
     const hash = await sha256Hex(n)
-    const result = await kv('set', poolKey(series, hash), '1')
-    if (result === 'OK') registered += 1
-    else invalid += 1
+    // SADD 返回数字 1/0:1 = 新码入库并计数,0 = 已在池(只确保池键存在,不重复计数)
+    const added = await kv('sadd', poolIndexKey(series), hash)
+    if (kvNum(added) === 1) {
+      const r = await kvPipe(['set', poolKey(series, hash), '1'])
+      if (Array.isArray(r)) registered += 1
+      else invalid += 1
+    } else {
+      const r = await kv('set', poolKey(series, hash), '1')
+      if (r === 'OK') registered += 1
+      else invalid += 1
+    }
   }
   return json(
     { ok: true, received: codes.length, registered, invalid_or_failed: invalid },

@@ -1,0 +1,142 @@
+﻿import { useEffect, useState } from 'react'
+import { daScore, daSequel } from '../data/da'
+import { PRICES } from '../data/prices'
+import { isUnlocked } from '../lib/codes'
+import { dec, nav } from '../lib/share'
+import { renderDAPoster } from '../lib/poster'
+import PosterModal from '../components/PosterModal'
+import { Reveal, Typewriter } from '../components/ui'
+import NextTests from '../components/NextTests'
+
+export default function ResultDa({ params }: { params: URLSearchParams }) {
+  const d = dec<number[]>(params.get('d'))
+  const [poster, setPoster] = useState<string | null>(null)
+  const [unlocked, setUnlockedState] = useState(isUnlocked('da'))
+  const [shown, setShown] = useState(0)
+
+  const valid = !!d && d.length === 8
+
+  useEffect(() => { if (!valid) nav('/') }, [valid])
+
+  // 异常指数滚动计数(最后停住时轻微过冲)
+  useEffect(() => {
+    if (!valid) return
+    const target = daScore(d!).index
+    let raf = 0
+    const t0 = performance.now()
+    const step = (t: number) => {
+      const p = Math.min(1, (t - t0) / 1100)
+      setShown(Math.round(target * p * (2 - p)))
+      if (p < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [valid])
+
+  if (!valid) return null
+
+  const r = daScore(d!)
+  const locked = !unlocked
+  const freeNotes = r.notes.filter(n => !n.paid).slice(0, 3)
+  const paidNotes = r.notes.filter(n => n.paid || !freeNotes.includes(n)).slice(0, 6)
+
+  return (
+    <div className={r.hidden ? 'da-stage result escaped' : 'da-stage result'}>
+      <div className="topbar"><button className="back" onClick={() => nav('/')}>← 首页</button></div>
+
+      {r.hidden && (
+        <div className="da-escaped fade-in">
+          <div className="es-line">⚠ 样本第43号于归档途中逃逸</div>
+          <div className="es-sub">最后一次出现:你正在读这行字。</div>
+        </div>
+      )}
+
+      <div className="result-hero fade-in">
+        <div className="kicker">CLASSIFIED FILE · 样本观察档案</div>
+        <h1 style={{ fontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace', letterSpacing: 2 }}>
+          FILE No.43
+        </h1>
+        <div className="hook">建档完成。以下内容为观察员对样本的全程批注,样本本人可阅——这本身就是实验的一部分。</div>
+      </div>
+
+      <Reveal><div className="section da-sec">
+        <div className="s-title">异常指数</div>
+        <div className="index-hero">
+          <div className="big-index da">{shown}</div>
+          <div className="over">ANOMALY INDEX / 100</div>
+        </div>
+        <div className="da-tier">
+          <span className="t-badge">{r.tier.name}</span>
+          <span className="t-desc">{r.tier.desc}</span>
+        </div>
+        <div className="rx-note mono">档案编号:{r.fileNo}</div>
+      </div></Reveal>
+
+      <Reveal><div className="section da-sec">
+        <div className="s-title">观察员批注(已解密 {freeNotes.length} 条)</div>
+        <ul className="da-notes">
+          {freeNotes.map((n, i) => (
+            <li key={i}><span className="n-idx">{String(i + 1).padStart(2, '0')}</span>
+              <Typewriter text={n.text} speed={14} /></li>
+        ))}
+        </ul>
+      </div></Reveal>
+
+      {locked && (
+        <Reveal><div className="section da-sec locked">
+          <div className="s-title">完整观察报告 · 已涂销</div>
+          <ul className="perks">
+            <li>解密全部批注({r.notes.length} 条,含管理员私章)</li>
+            <li>《你被观察的第43天》续篇档案</li>
+            {r.defiance && <li>「拒答事件」完整记录与管理员复盘</li>}
+            {r.oracle && <li>「样本疑似能读取档案」事件调查卷宗</li>}
+            {r.hidden && <li>逃逸事件全程回放(该记录仅逃逸样本可见)</li>}
+            <li>完整档案高清海报(磷光终端风)</li>
+          </ul>
+          <div className="unlock-cta">
+            <span className="price">¥{PRICES.da}</span>
+            <button className="btn primary" onClick={() => { try { sessionStorage.setItem('wy_return', location.hash.replace(/^#/, '')) } catch { /* ignore */ } nav('/unlock?p=da') }}>
+              输入兑换码解密档案
+            </button>
+          </div>
+        </div></Reveal>
+      )}
+
+      {!locked && (
+        <>
+          <Reveal><div className="section da-sec">
+            <div className="s-title">批注 · 全量解密</div>
+            <ul className="da-notes">
+              {paidNotes.map((n, i) => (
+                <li key={i}><span className="n-idx">{String(i + 1).padStart(2, '0')}</span>{n.text}</li>
+              ))}
+            </ul>
+          </div></Reveal>
+
+          <Reveal><div className="section da-sec">
+            <div className="s-title">续篇 · 你被观察的第43天</div>
+            {daSequel(r).map((p, i) => <div className="rx-note mono" key={i} style={{ marginBottom: 8 }}>{p}</div>)}
+            {r.hidden && (
+              <div className="da-whisper">逃逸样本专属:你已重读此段 1 次。管理员没有计数。大概。</div>
+            )}
+          </div></Reveal>
+        </>
+      )}
+
+      <div className="foot-note" style={{ color: '#8f8c97' }}>
+        本测试为娱乐向虚构档案,不构成任何心理测评或现实判断。
+      </div>
+
+      <NextTests exclude="da" />
+
+      <div className="actions fade-in">
+        <button className="btn primary" onClick={() => setPoster(renderDAPoster({
+          index: r.index, tier: r.tier, note: freeNotes[0]?.text || '', fileNo: r.fileNo, hidden: r.hidden
+        }))}>保存观察档案海报</button>
+        <button className="btn ghost" onClick={() => nav('/quiz/da')}>重测(档案会记得你)</button>
+      </div>
+
+      {poster && <PosterModal url={poster} series="da" onClose={() => setPoster(null)} />}
+    </div>
+  )
+}

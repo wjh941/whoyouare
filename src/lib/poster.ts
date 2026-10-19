@@ -1,6 +1,8 @@
 import { MingGe } from '../data/zh'
 import { HidLabel } from '../data/hid'
 import { CfIdentity, CfTier, cfMoney } from '../data/cf'
+import { RlElement, RlType } from '../data/rl'
+import { DaTier } from '../data/da'
 
 export interface CfTlItem { year: string; text: string; kind?: 'trap' | 'god' }
 
@@ -420,6 +422,219 @@ export function renderCFPoster(
   x.fillStyle = '#8a7a4a'
   x.font = `500 18px ${SANS}`
   center(x, 'whoyouare · 穿越暴富体质测试', W / 2, H - 64)
+
+  grain(x)
+  return c.toDataURL('image/png')
+}
+
+/* ============ 关系反应炉 · 暗金实验海报 ============ */
+
+export function renderRLPoster(o: {
+  solo: boolean
+  fileNo: string
+  index: number
+  eleA: RlElement
+  eleB: RlElement | null
+  type: RlType | null
+  envName: string
+  quip: string
+  mines: string[]
+  envNote: string
+}): string {
+  const { c, x } = newCanvas()
+  const W = 720
+  const H = 960
+  const TEAL = '#4ad6c5'
+  const GOLD = '#f5c542'
+  const INK = '#e8e4ee'
+  const SUB = '#9b93a8'
+
+  x.fillStyle = '#17131c'
+  x.fillRect(0, 0, W, H)
+  x.strokeStyle = 'rgba(245,197,66,.55)'
+  x.lineWidth = 2
+  x.strokeRect(26, 26, W - 52, H - 52)
+  x.strokeStyle = 'rgba(74,214,197,.35)'
+  x.lineWidth = 1
+  x.strokeRect(38, 38, W - 76, H - 76)
+
+  x.fillStyle = TEAL
+  x.font = `700 20px ${SANS}`
+  center(x, 'RELATIONSHIP REACTOR · 关系反应炉', W / 2, 96)
+
+  let y = 170
+  if (!o.solo && o.type) {
+    x.fillStyle = GOLD
+    x.font = `900 52px ${SANS}`
+    center(x, o.type.name, W / 2, y)
+    y += 44
+    x.fillStyle = TEAL
+    x.font = `600 22px ${SANS}`
+    center(x, o.type.formula, W / 2, y)
+    y += 58
+  } else {
+    x.fillStyle = GOLD
+    x.font = `800 30px ${SANS}`
+    center(x, '你的反应活性样本', W / 2, y - 20)
+    y += 40
+  }
+
+  // 元素格
+  const cell = (cx: number, e: RlElement) => {
+    x.strokeStyle = GOLD
+    x.lineWidth = 2
+    roundRect(x, cx - 82, y, 164, 186, 14)
+    x.stroke()
+    x.fillStyle = SUB
+    x.font = `500 20px ${SANS}`
+    center(x, String(e.no), cx, y + 38)
+    x.fillStyle = INK
+    x.font = `900 64px ${SANS}`
+    center(x, e.sym, cx, y + 108)
+    x.fillStyle = GOLD
+    x.font = `700 24px ${SANS}`
+    center(x, e.name, cx, y + 156)
+  }
+  if (o.solo || !o.eleB) {
+    cell(W / 2, o.eleA)
+    y += 220
+  } else {
+    cell(W / 2 - 118, o.eleA)
+    cell(W / 2 + 118, o.eleB)
+    x.fillStyle = TEAL
+    x.font = `900 40px ${SANS}`
+    center(x, '×', W / 2, y + 104)
+    y += 220
+  }
+
+  // 指数
+  x.fillStyle = SUB
+  x.font = `500 20px ${SANS}`
+  center(x, '反应指数', W / 2, y + 6)
+  x.fillStyle = GOLD
+  x.font = `900 84px ${SANS}`
+  center(x, String(o.index), W / 2, y + 86)
+  y += 130
+
+  // 短评
+  x.fillStyle = INK
+  x.font = `500 23px ${SANS}`
+  let dy = y + 10
+  for (const ln of wrap(x, o.quip, 560).slice(0, 3)) { center(x, ln, W / 2, dy); dy += 36 }
+
+  // 环境
+  if (o.envName) {
+    dy += 8
+    x.fillStyle = TEAL
+    x.font = `600 21px ${SANS}`
+    center(x, `反应环境 · ${o.envName}`, W / 2, dy)
+    dy += 34
+  }
+
+  x.fillStyle = SUB
+  x.font = `400 17px ${SANS}`
+  center(x, `档案编号 ${o.fileNo} · 本测试仅供娱乐,不构成任何关系建议`, W / 2, H - 84)
+  x.fillStyle = '#8a7a4a'
+  x.font = `500 18px ${SANS}`
+  center(x, 'whoyouare · 关系反应炉', W / 2, H - 52)
+
+  grain(x)
+  return c.toDataURL('image/png')
+}
+
+function roundRect(x: CanvasRenderingContext2D, rx: number, ry: number, w: number, h: number, r: number) {
+  x.beginPath()
+  x.moveTo(rx + r, ry)
+  x.arcTo(rx + w, ry, rx + w, ry + h, r)
+  x.arcTo(rx + w, ry + h, rx, ry + h, r)
+  x.arcTo(rx, ry + h, rx, ry, r)
+  x.arcTo(rx, ry, rx + w, ry, r)
+  x.closePath()
+}
+
+/* ============ 第43号档案 · 磷光终端海报 ============ */
+
+export function renderDAPoster(o: {
+  index: number
+  tier: DaTier
+  note: string
+  fileNo: string
+  hidden: boolean
+}): string {
+  const { c, x } = newCanvas()
+  const W = 720
+  const H = 960
+  const PH = '#39ff6b'
+  const PH_DIM = '#9fdfae'
+  const MONO = '"JetBrains Mono", ui-monospace, Consolas, "Courier New", monospace'
+
+  x.fillStyle = '#06130a'
+  x.fillRect(0, 0, W, H)
+
+  // 扫描线
+  x.fillStyle = 'rgba(57,255,107,0.045)'
+  for (let sy = 0; sy < H; sy += 4) x.fillRect(0, sy, W, 2)
+
+  x.strokeStyle = 'rgba(57,255,107,.5)'
+  x.lineWidth = 2
+  x.strokeRect(26, 26, W - 52, H - 52)
+
+  x.fillStyle = PH
+  x.font = `700 30px ${MONO}`
+  center(x, 'CLASSIFIED FILE No.43', W / 2, 110)
+  x.fillStyle = PH_DIM
+  x.font = `500 19px ${MONO}`
+  center(x, 'SAMPLE OBSERVATION RECORD', W / 2, 148)
+  x.strokeStyle = 'rgba(57,255,107,.4)'
+  x.beginPath(); x.moveTo(80, 176); x.lineTo(W - 80, 176); x.stroke()
+
+  x.fillStyle = PH_DIM
+  x.font = `500 22px ${MONO}`
+  center(x, 'ANOMALY INDEX / 100', W / 2, 260)
+  x.fillStyle = PH
+  x.font = `900 130px ${MONO}`
+  center(x, String(o.index), W / 2, 390)
+
+  // 危险度分级
+  x.strokeStyle = PH
+  x.lineWidth = 2
+  roundRect(x, 130, 448, W - 260, 118, 10)
+  x.stroke()
+  x.fillStyle = PH
+  x.font = `800 34px ${MONO}`
+  center(x, o.tier.name, W / 2, 502)
+  x.fillStyle = PH_DIM
+  x.font = `400 18px ${MONO}`
+  let ty = 540
+  for (const ln of wrap(x, o.tier.desc, W - 300).slice(0, 2)) { center(x, ln, W / 2, ty); ty += 26 }
+
+  // 批注
+  x.fillStyle = PH_DIM
+  x.font = `500 18px ${MONO}`
+  center(x, '> OBSERVER NOTES_ ', 160, 640)
+  x.fillStyle = PH
+  x.font = `500 21px ${MONO}`
+  let ny = 682
+  for (const ln of wrap(x, o.note || '样本表现正常——这本身就很可疑。', 560).slice(0, 3)) {
+    center(x, ln, W / 2, ny); ny += 34
+  }
+
+  if (o.hidden) {
+    x.fillStyle = 'rgba(255,60,60,.14)'
+    x.fillRect(60, ny + 6, W - 120, 56)
+    x.strokeStyle = 'rgba(255,80,80,.7)'
+    x.strokeRect(60, ny + 6, W - 120, 56)
+    x.fillStyle = '#ff6b6b'
+    x.font = `700 20px ${MONO}`
+    center(x, '[ 逃逸事件记录:已生成 ]', W / 2, ny + 42)
+  }
+
+  x.fillStyle = PH_DIM
+  x.font = `400 17px ${MONO}`
+  center(x, `${o.fileNo} · 娱乐向虚构档案,不构成任何现实判断`, W / 2, H - 84)
+  x.fillStyle = PH
+  x.font = `500 18px ${MONO}`
+  center(x, 'whoyouare · 第43号档案', W / 2, H - 52)
 
   grain(x)
   return c.toDataURL('image/png')

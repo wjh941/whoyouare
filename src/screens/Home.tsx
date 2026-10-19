@@ -1,11 +1,14 @@
 import { dec } from '../lib/share'
 
-interface CpTop { t?: 'zh' | 'hid'; d?: string; f?: string; l?: string }
+interface CpTop { t?: 'zh' | 'hid' | 'rl' | 'da'; d?: string; f?: string; l?: string }
 
 const MARQUEE = [
   '圣旨体判词', '官方认证接盘侠', '表面淡人实际隐藏疯批', '甄学太后', '暴富指数 98',
-  '清醒的恋爱脑', '平行暴富时间表', '神预言 7:1', '钝感力大师', '眉庄式深情'
+  '清醒的恋爱脑', '平行暴富时间表', '神预言 7:1', '钝感力大师', '眉庄式深情',
+  '反应指数 92', '惰性气体搭子型', '档案异常指数 43'
 ]
+
+const CP_NAME: Record<string, string> = { zh: '宫斗命格', hid: '隐藏人格', rl: '关系反应炉', da: '第43号档案' }
 
 export default function Home({ params }: { params: URLSearchParams }) {
   const cp = dec<CpTop>(params.get('c'))
@@ -22,7 +25,7 @@ export default function Home({ params }: { params: URLSearchParams }) {
         <div className="rotator">
           <span>题题有梗，结果能晒，海报直接存相册</span>
           <span>答得好晒高分，答得差晒「官方认证接盘侠」</span>
-          <span>三个世界随你穿越 · 换个开局就是新剧本</span>
+          <span>五个世界随你穿越 · 换个开局就是新剧本</span>
         </div>
       </div>
 
@@ -43,7 +46,7 @@ export default function Home({ params }: { params: URLSearchParams }) {
         <div className="cp-banner fade-in">
           <b> 有人向你发来战书 </b>
           <br />
-          好友已测出「{cp.t === 'hid' ? '隐藏人格' : '宫斗命格'}」，测完解锁你们的关系局。
+          好友已测出「{CP_NAME[cp.t || 'zh'] || '命格'}」，测完解锁你们的关系局。
         </div>
       )}
 
@@ -84,6 +87,31 @@ export default function Home({ params }: { params: URLSearchParams }) {
           </div>
           <span className="go">抽开局 →</span>
           <span className="no">叁</span>
+        </a>
+
+        <a className="entry rl" href={quizLink('rl')} data-emoji="⚗️">
+          <span className="tagline">新上 · 双人合测</span>
+          <span className="badge">单人免费 · 合盘解锁</span>
+          <h2>关系反应炉</h2>
+          <div className="desc">
+            你出题，TA入局：各自答完8道情景题，合成一份化学反应报告——
+            核聚变还是惰性气体搭子，官方盖章认证。一人生成，必须发给另一人。
+          </div>
+          <span className="go">入釜开测 →</span>
+          <span className="no">肆</span>
+        </a>
+
+        <a className="entry da" href={quizLink('da')} data-emoji="🗄️">
+          <span className="tagline">万圣限定 · Meta 悬疑</span>
+          <span className="badge">档案免费 · 完整观察报告解锁</span>
+          <h2>第43号档案</h2>
+          <div className="desc">
+            前3题正常，后面开始不对劲：题目会引用你的答案，
+            进度条悄悄消失。你以为你在做题——其实是题在做你。
+            观察员全程毒舌批注，测完发你一份「样本观察档案」。
+          </div>
+          <span className="go">调取档案 →</span>
+          <span className="no">伍</span>
         </a>
       </div>
 

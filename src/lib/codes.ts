@@ -1,11 +1,15 @@
 import { CODE_HASHES } from '../data/codes.gen'
 import { CODE_HASHES as CODE_HASHES_CF } from '../data/codes_cf.gen'
+import { CODE_HASHES_RL } from '../data/codes_rl.gen'
+import { CODE_HASHES_DA } from '../data/codes_da.gen'
 
-export type CodeSeries = 'hid' | 'cf'
+export type CodeSeries = 'hid' | 'cf' | 'rl' | 'da'
 
 const SERIES: Record<CodeSeries, { hashes: string[]; key: string }> = {
   hid: { hashes: CODE_HASHES, key: 'wy_unlocked' },
-  cf: { hashes: CODE_HASHES_CF, key: 'wy_unlocked_cf' }
+  cf: { hashes: CODE_HASHES_CF, key: 'wy_unlocked_cf' },
+  rl: { hashes: CODE_HASHES_RL, key: 'wy_unlocked_rl' },
+  da: { hashes: CODE_HASHES_DA, key: 'wy_unlocked_da' }
 }
 
 /** 归一化：全角→半角、去空格/横杠/零宽字符、统一大写（防手机输入法坑） */

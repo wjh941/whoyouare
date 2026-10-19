@@ -9,9 +9,11 @@
  * 存储为 Vercel KV(Upstash REST),未配置时本接口自动降级。
  */
 import {
+  actIndexKey,
   actKey,
   clientIp,
   corsHeaders,
+  isCodeSeries,
   json,
   kv,
   kvConfigured,
@@ -40,7 +42,7 @@ export default async function handler(req: Request): Promise<Response> {
   }
   const series = body.series as CodeSeries
   const device = String(body.device || '').slice(0, 64)
-  if (series !== 'hid' && series !== 'cf') return json({ error: 'invalid_series' }, 400, origin)
+  if (!isCodeSeries(series)) return json({ error: 'invalid_series' }, 400, origin)
   if (!device) return json({ error: 'device_required' }, 400, origin)
 
   const n = normalizeCode(String(body.code || ''))
@@ -54,7 +56,11 @@ export default async function handler(req: Request): Promise<Response> {
 
   // 2. 原子激活:SET NX 保证并发下只有一个设备能绑定
   const setResult = await kv('set', actKey(series, hash), device, 'nx')
-  if (setResult === 'OK') return json({ ok: true, mode: 'activated' }, 200, origin)
+  if (setResult === 'OK') {
+    // 维护激活索引(发码台"已激活"库存口径);失败不影响解锁主流程
+    await kv('sadd', actIndexKey(series), hash)
+    return json({ ok: true, mode: 'activated' }, 200, origin)
+  }
 
   // 3. 已被绑定:同设备幂等放行,他设备拒绝
   const bound = await kv('get', actKey(series, hash))
