@@ -1,5 +1,7 @@
 # whoyouare · 你是谁测试所(三合一测试 H5)
 
+> **“认识你自己。”** —— 德尔斐神谕
+
 [![Deploy GitHub Pages](https://github.com/wjh941/whoyouare/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/wjh941/whoyouare/actions/workflows/deploy-pages.yml) [![React](https://img.shields.io/badge/React-18-087EA4?logo=react&logoColor=white)](https://react.dev) [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 
 > 题题有梗,结果能晒,海报直接存相册。
