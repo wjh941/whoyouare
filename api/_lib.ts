@@ -150,15 +150,18 @@ export async function kvPipe(...commands: (string | number)[][]): Promise<unknow
       console.error('[kvpipe] http', res.status, commands.map(c => c[0]).join(','), text)
       return null
     }
-    const data = (await res.json()) as { result?: { result?: unknown; error?: string }[]; error?: string }
-    if (data.error) {
-      kvLastError = data.error
-      console.error('[kvpipe] →', data.error)
+    const data = (await res.json()) as unknown
+    // 兼容两种返回形状:裸数组 [{"result":…},…] 或包装对象 {result:[…]}
+    const arr = Array.isArray(data)
+      ? data
+      : (data as { result?: { result?: unknown; error?: string }[]; error?: string }).result
+    if (!Array.isArray(arr)) {
+      kvLastError = 'pipeline 响应形状异常: ' + JSON.stringify(data).slice(0, 120)
+      console.error('[kvpipe] bad shape', kvLastError)
       return null
     }
-    if (!Array.isArray(data.result)) { kvLastError = 'pipeline 响应无 result 数组'; return null }
     kvLastError = ''
-    return data.result.map(item => (item && typeof item === 'object' && 'result' in item ? (item as { result: unknown }).result : null))
+    return arr.map(item => (item && typeof item === 'object' && 'result' in item ? (item as { result: unknown }).result : null))
   } catch (e) {
     kvLastError = 'fetch: ' + (e instanceof Error ? e.message : String(e))
     console.error('[kvpipe] fetch fail', kvLastError)
