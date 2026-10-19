@@ -92,9 +92,13 @@ export function kvConfigured(): boolean {
   return KV_URL !== '' && KV_TOKEN !== ''
 }
 
+/** 最近一次 KV 失败的原因(随 503 返回给发码台,便于现场诊断) */
+let kvLastError = ''
+export function kvLastErrorText(): string { return kvLastError }
+
 /** 执行一条 Redis 命令(POST JSON 数组形式,避免 URL 转义问题);失败返回 null */
 export async function kv(...args: (string | number)[]): Promise<string | null> {
-  if (!kvConfigured()) return null
+  if (!kvConfigured()) { kvLastError = 'env 未配置'; return null }
   try {
     const res = await fetch(KV_URL, {
       method: 'POST',
@@ -106,18 +110,23 @@ export async function kv(...args: (string | number)[]): Promise<string | null> {
     })
     if (!res.ok) {
       // 诊断:把 HTTP 层失败原因写进运行时日志(Vercel Logs 可见)
-      console.error('[kv] http', res.status, args[0], await res.text().catch(() => ''))
+      const text = await res.text().catch(() => '')
+      kvLastError = 'HTTP ' + res.status + ' ' + text.slice(0, 160)
+      console.error('[kv] http', res.status, args[0], text)
       return null
     }
     const data = (await res.json()) as { result?: string | number | null; error?: string }
     // Upstash 命令级错误(如 WRONGTYPE)可能随 200 返回 {"error": "..."}
     if (data.error) {
+      kvLastError = data.error
       console.error('[kv] cmd', args[0], '→', data.error)
       return null
     }
+    kvLastError = ''
     return (data.result ?? null) as string | null
   } catch (e) {
-    console.error('[kv] fetch fail', args[0], e instanceof Error ? e.message : e)
+    kvLastError = 'fetch: ' + (e instanceof Error ? e.message : String(e))
+    console.error('[kv] fetch fail', args[0], kvLastError)
     return null
   }
 }
@@ -136,18 +145,23 @@ export async function kvPipe(...commands: (string | number)[][]): Promise<unknow
       body: JSON.stringify(commands),
     })
     if (!res.ok) {
-      console.error('[kvpipe] http', res.status, commands.map(c => c[0]).join(','))
+      const text = await res.text().catch(() => '')
+      kvLastError = 'HTTP ' + res.status + ' ' + text.slice(0, 160)
+      console.error('[kvpipe] http', res.status, commands.map(c => c[0]).join(','), text)
       return null
     }
     const data = (await res.json()) as { result?: { result?: unknown; error?: string }[]; error?: string }
     if (data.error) {
+      kvLastError = data.error
       console.error('[kvpipe] →', data.error)
       return null
     }
-    if (!Array.isArray(data.result)) return null
+    if (!Array.isArray(data.result)) { kvLastError = 'pipeline 响应无 result 数组'; return null }
+    kvLastError = ''
     return data.result.map(item => (item && typeof item === 'object' && 'result' in item ? (item as { result: unknown }).result : null))
   } catch (e) {
-    console.error('[kvpipe] fetch fail', e instanceof Error ? e.message : e)
+    kvLastError = 'fetch: ' + (e instanceof Error ? e.message : String(e))
+    console.error('[kvpipe] fetch fail', kvLastError)
     return null
   }
 }

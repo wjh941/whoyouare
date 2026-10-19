@@ -20,6 +20,7 @@ import {
   json,
   kv,
   kvConfigured,
+  kvLastErrorText,
   kvNum,
   kvPipe,
   logKey,
@@ -158,14 +159,14 @@ export default async function handler(req: Request): Promise<Response> {
         // SADD 幂等去重(Upstash 返回数字 1/0):0 = 该哈希已在池,跳过防重复入库
         const added = await kv('sadd', poolIndexKey(s), hash)
         // null = 命令本身失败(URL/令牌不对):明确报错,绝不伪装成"重复"
-        if (added === null) return json({ error: 'kv_unreachable' }, 503, origin)
+        if (added === null) return json({ error: 'kv_unreachable', detail: kvLastErrorText() }, 503, origin)
         if (kvNum(added) !== 1) { duplicated += 1; continue }
         const r = await kvPipe(
           ['set', poolKey(s, hash), '1'],
           ['rpush', availKey(s), code],
         )
         if (Array.isArray(r)) created += 1
-        else return json({ error: 'kv_unreachable' }, 503, origin)
+        else return json({ error: 'kv_unreachable', detail: kvLastErrorText() }, 503, origin)
       }
       await logBench({ ts: Date.now(), act: 'gen', series: s, n: created })
       return json({ ok: true, created, duplicated }, 200, origin)
@@ -186,7 +187,7 @@ export default async function handler(req: Request): Promise<Response> {
       if (!s) return json({ error: 'series_required' }, 400, origin)
       const code = await kv('rpop', availKey(s))
       // null = 命令失败(KV 连不上),与"库存空"是两回事
-      if (code === null) return json({ error: 'kv_unreachable' }, 503, origin)
+      if (code === null) return json({ error: 'kv_unreachable', detail: kvLastErrorText() }, 503, origin)
       if (!code) return json({ error: 'no_stock' }, 404, origin)
       const item = JSON.stringify({ code, ts: Date.now() })
       const r = await kvPipe(

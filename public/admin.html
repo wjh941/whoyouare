@@ -300,7 +300,7 @@ async function api(action, payload) {
       template_missing_code_placeholder: '模板里必须有 {code} 占位符',
       too_many_requests: '操作太频繁,稍等一分钟',
     }
-    throw new Error(MAP[data.error] || ('请求失败(' + res.status + ')'))
+    throw new Error((MAP[data.error] || ('请求失败(' + res.status + ')')) + (data.detail ? '\n[详情] ' + data.detail : ''))
   }
   return data
 }
