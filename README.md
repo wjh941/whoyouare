@@ -1,6 +1,6 @@
 # whoyouare · 你是谁测试所(三合一测试 H5)
 
-> **“认识你自己。”** —— 德尔斐神谕
+> 🎬 **使用场景**：你刷小红书时看到"测测你是甄嬛传里的谁"——H5 打开即玩、答完生成海报晒图。这就是那条产品线：免费测评引流，完整版凭兑换码解锁，一码一设备防转发。
 
 [![Deploy GitHub Pages](https://github.com/wjh941/whoyouare/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/wjh941/whoyouare/actions/workflows/deploy-pages.yml) [![React](https://img.shields.io/badge/React-18-087EA4?logo=react&logoColor=white)](https://react.dev) [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 
