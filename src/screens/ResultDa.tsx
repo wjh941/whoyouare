@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { daScore, daSequel } from '../data/da'
 import { PRICES } from '../data/prices'
 import { isUnlocked } from '../lib/codes'
@@ -17,6 +17,29 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
   const valid = !!d && d.length === 8
 
   useEffect(() => { if (!valid) nav('/') }, [valid])
+
+  // 第四面墙:管理员的目光(右键 / 切走 / 保存档案,各一次)
+  const [whisper, setWhisper] = useState('')
+  const said = useRef({ ctx: false, save: false, away: false })
+  useEffect(() => {
+    if (!valid) return
+    const onCtx = () => {
+      if (said.current.ctx) return
+      said.current.ctx = true
+      setWhisper('管理员已注意到你的右键。检查源码,也找不到这份档案的边界。')
+    }
+    const onVis = () => {
+      if (!document.hidden || said.current.away) return
+      said.current.away = true
+      setWhisper('你刚才离开了。管理员数了。是 43 秒。')
+    }
+    document.addEventListener('contextmenu', onCtx)
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      document.removeEventListener('contextmenu', onCtx)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [valid])
 
   // 异常指数滚动计数(最后停住时轻微过冲)
   useEffect(() => {
@@ -39,6 +62,20 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
   const locked = !unlocked
   const freeNotes = r.notes.filter(n => !n.paid).slice(0, 3)
   const paidNotes = r.notes.filter(n => n.paid || !freeNotes.includes(n)).slice(0, 6)
+
+  // 批注盖章:由档案编号末位决定起点,保证同一档案盖同一批章
+  const STAMPS = ['机密', '已涂销', '建议存档']
+  const stampOf = (i: number) => STAMPS[(i + r.fileNo.charCodeAt(r.fileNo.length - 1)) % STAMPS.length]
+
+  const savePoster = () => {
+    if (!said.current.save) {
+      said.current.save = true
+      setWhisper('管理员已注意到你正在保存这份档案。传播行为已被记录。大概。')
+    }
+    setPoster(renderDAPoster({
+      index: r.index, tier: r.tier, note: freeNotes[0]?.text || '', fileNo: r.fileNo, hidden: r.hidden
+    }))
+  }
 
   return (
     <div className={r.hidden ? 'da-stage result escaped' : 'da-stage result'}>
@@ -77,8 +114,10 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
         <ul className="da-notes">
           {freeNotes.map((n, i) => (
             <li key={i}><span className="n-idx">{String(i + 1).padStart(2, '0')}</span>
-              <Typewriter text={n.text} speed={14} /></li>
-        ))}
+              <Typewriter text={n.text} speed={14} />
+              {i % 2 === 1 && <span className="da-stamp">{stampOf(i)}</span>}
+            </li>
+          ))}
         </ul>
       </div></Reveal>
 
@@ -108,7 +147,9 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
             <div className="s-title">批注 · 全量解密</div>
             <ul className="da-notes">
               {paidNotes.map((n, i) => (
-                <li key={i}><span className="n-idx">{String(i + 1).padStart(2, '0')}</span>{n.text}</li>
+                <li key={i}><span className="n-idx">{String(i + 1).padStart(2, '0')}</span>{n.text}
+                  {i % 3 === 1 && <span className="da-stamp">{stampOf(i + 1)}</span>}
+                </li>
               ))}
             </ul>
           </div></Reveal>
@@ -130,11 +171,11 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
       <NextTests exclude="da" />
 
       <div className="actions fade-in">
-        <button className="btn primary" onClick={() => setPoster(renderDAPoster({
-          index: r.index, tier: r.tier, note: freeNotes[0]?.text || '', fileNo: r.fileNo, hidden: r.hidden
-        }))}>保存观察档案海报</button>
+        <button className="btn primary" onClick={savePoster}>保存观察档案海报</button>
         <button className="btn ghost" onClick={() => nav('/quiz/da')}>重测(档案会记得你)</button>
       </div>
+
+      {whisper && <div className="da-whisper result">{whisper}</div>}
 
       {poster && <PosterModal url={poster} series="da" onClose={() => setPoster(null)} />}
     </div>

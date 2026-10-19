@@ -479,28 +479,37 @@ export function renderRLPoster(o: {
     y += 40
   }
 
-  // 元素格
-  const cell = (cx: number, e: RlElement) => {
+  // 元素格(周期表样式:序数/符号/名 + 危险品脚标)
+  const cell = (cx: number, e: RlElement, hz: string, safe: boolean) => {
     x.strokeStyle = GOLD
     x.lineWidth = 2
     roundRect(x, cx - 82, y, 164, 186, 14)
     x.stroke()
     x.fillStyle = SUB
     x.font = `500 20px ${SANS}`
-    center(x, String(e.no), cx, y + 38)
+    center(x, String(e.no), cx, y + 36)
     x.fillStyle = INK
-    x.font = `900 64px ${SANS}`
-    center(x, e.sym, cx, y + 108)
+    x.font = `900 60px ${SANS}`
+    center(x, e.sym, cx, y + 98)
     x.fillStyle = GOLD
     x.font = `700 24px ${SANS}`
-    center(x, e.name, cx, y + 156)
+    center(x, e.name, cx, y + 140)
+    x.strokeStyle = safe ? 'rgba(127,214,168,.4)' : 'rgba(255,154,138,.5)'
+    x.lineWidth = 1
+    x.setLineDash([5, 4])
+    x.beginPath(); x.moveTo(cx - 70, y + 156); x.lineTo(cx + 70, y + 156); x.stroke()
+    x.setLineDash([])
+    x.fillStyle = safe ? '#7fd6a8' : '#ff9a8a'
+    x.font = `600 14px ${SANS}`
+    center(x, hz, cx, y + 176)
   }
+  const mhz = o.mines.length ? `危险品 ×${o.mines.length} · 腐蚀性` : '零雷区 · 性状稳定'
   if (o.solo || !o.eleB) {
-    cell(W / 2, o.eleA)
+    cell(W / 2, o.eleA, '单剂样本 · 反应性未知', true)
     y += 220
   } else {
-    cell(W / 2 - 118, o.eleA)
-    cell(W / 2 + 118, o.eleB)
+    cell(W / 2 - 118, o.eleA, mhz, o.mines.length === 0)
+    cell(W / 2 + 118, o.eleB, mhz, o.mines.length === 0)
     x.fillStyle = TEAL
     x.font = `900 40px ${SANS}`
     center(x, '×', W / 2, y + 104)
@@ -618,6 +627,20 @@ export function renderDAPoster(o: {
   for (const ln of wrap(x, o.note || '样本表现正常——这本身就很可疑。', 560).slice(0, 3)) {
     center(x, ln, W / 2, ny); ny += 34
   }
+
+  // 批注盖章(斜盖红章)
+  x.save()
+  x.translate(588, 632)
+  x.rotate(-0.14)
+  x.globalAlpha = 0.78
+  x.strokeStyle = '#ff6b6b'
+  x.lineWidth = 2
+  x.strokeRect(-46, -16, 92, 32)
+  x.fillStyle = '#ff6b6b'
+  x.font = `700 17px ${MONO}`
+  x.textAlign = 'center'
+  x.fillText('机 密', 0, 6)
+  x.restore()
 
   if (o.hidden) {
     x.fillStyle = 'rgba(255,60,60,.14)'

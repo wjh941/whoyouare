@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { RL_DIM_NAMES, rlPersonal, rlMerged, rlFormulaNo, RlInvite } from '../data/rl'
 import { PRICES } from '../data/prices'
 import { isUnlocked } from '../lib/codes'
@@ -66,6 +66,7 @@ export default function ResultRl({ params }: { params: URLSearchParams }) {
             <span className="el-no">{r.element.no}</span>
             <span className="el-sym">{r.element.sym}</span>
             <span className="el-name">{r.element.name} · {r.element.title}</span>
+            <span className="el-hz safe">单剂样本 · 反应性未知</span>
           </div>
           <div className="rx-note">{r.element.desc}</div>
         </div>
@@ -134,12 +135,14 @@ export default function ResultRl({ params }: { params: URLSearchParams }) {
             <span className="el-no">{r.eleA.no}</span>
             <span className="el-sym">{r.eleA.sym}</span>
             <span className="el-name">{r.eleA.name}</span>
+            <span className={'el-hz' + (r.mines.length ? '' : ' safe')}>{r.mines.length ? `危险品 ×${r.mines.length}` : '零雷区'}</span>
           </div>
           <span className="duo-x">×</span>
           <div className="element-card sm">
             <span className="el-no">{r.eleB.no}</span>
             <span className="el-sym">{r.eleB.sym}</span>
             <span className="el-name">{r.eleB.name}</span>
+            <span className={'el-hz' + (r.mines.length ? '' : ' safe')}>{r.mines.length ? `危险品 ×${r.mines.length}` : '零雷区'}</span>
           </div>
         </div>
       </div></Reveal>
