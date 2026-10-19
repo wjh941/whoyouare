@@ -122,11 +122,12 @@ export async function kv(...args: (string | number)[]): Promise<string | null> {
   }
 }
 
-/** 流水线执行多条命令(Upstash REST:整个数组一次 POST,返回结果数组);失败返回 null */
+/** 流水线执行多条命令(Upstash REST v2:多条命令必须 POST 到 /pipeline);失败返回 null。
+ *  返回值已解包:每条命令的 result 摊平成数组,便于 kvNum/Array.isArray 直接消费 */
 export async function kvPipe(...commands: (string | number)[][]): Promise<unknown[] | null> {
   if (!kvConfigured()) return null
   try {
-    const res = await fetch(KV_URL, {
+    const res = await fetch(`${KV_URL}/pipeline`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${KV_TOKEN}`,
@@ -134,10 +135,19 @@ export async function kvPipe(...commands: (string | number)[][]): Promise<unknow
       },
       body: JSON.stringify(commands),
     })
-    if (!res.ok) return null
-    const data = (await res.json()) as { result?: unknown[] }
-    return data.result ?? null
-  } catch {
+    if (!res.ok) {
+      console.error('[kvpipe] http', res.status, commands.map(c => c[0]).join(','))
+      return null
+    }
+    const data = (await res.json()) as { result?: { result?: unknown; error?: string }[]; error?: string }
+    if (data.error) {
+      console.error('[kvpipe] →', data.error)
+      return null
+    }
+    if (!Array.isArray(data.result)) return null
+    return data.result.map(item => (item && typeof item === 'object' && 'result' in item ? (item as { result: unknown }).result : null))
+  } catch (e) {
+    console.error('[kvpipe] fetch fail', e instanceof Error ? e.message : e)
     return null
   }
 }
