@@ -36,6 +36,8 @@
 | **第43号档案** | Meta 悬疑款(万圣节点) | 8题(第4题起"档案异常") | 样本观察档案:异常指数+危险度分级+观察员毒舌批注+档案编号 / 隐藏结局「样本逃逸」(约1%,确定性哈希判定) / 磷光终端风海报 | `DA-` 兑换码解密全部批注+《你被观察的第43天》续篇 |
 
 > 关系反应炉延续站点通用 `?c=` 合测机制:发起人答完生成邀请链接,对方答完自动合并出双人报告;传播系数天然翻倍(一人生成,必须发给另一人)。第43号档案的题目会动态引用你前面的作答(证据回指),进度条会在中途"消失",管理员直接对话收尾——全部为娱乐向虚构档案,无任何灵异/恐怖表述。
+>
+> 内容细节:RL 元素卡采用周期表格子排版(原子序数 + 危险品脚标,雷区数量直接印在卡上,页面与海报同步);DA 观察员批注带确定性红章(机密/已涂销/建议存档,同一档案永远同一批章,海报同步),结果页埋有"打破第四面墙"彩蛋(右键 / 切出标签页 / 保存海报,各触发一条管理员留言)。
 
 ### 核心机制
 
@@ -75,7 +77,7 @@ git push                           # 备用线路: GitHub Pages(main 分支推�
 
 ## 兑换码机制
 
-- 两套独立码池:`HY-` 开头解锁隐藏人格完整版,`CF-` 开头解锁暴富时间表完整版,互不通用
+- 四条产品线独立码池:`HY-` 解锁隐藏人格完整版、`CF-` 解锁暴富时间表完整版、`RL-` 解锁关系反应炉双人合盘、`DA-` 解密43号档案观察报告,互不通用
 - 生成:`node scripts/gen-codes.mjs 10 HY 16`(隐藏人格) / `node scripts/gen-codes.mjs 10 CF 16`(暴富);或双击根目录 `发码工具.html` 本地图形界面生成
 - **码长默认 16 位(4位一组)**:哈希在公开前端包里,8/12位可被GPU穷举,16位(80bit)不可行——不要用短码售卖
 - 明文码只在生成时打印一次,前端只存 SHA-256 哈希,抓包/看源码拿不到码
@@ -89,7 +91,12 @@ git push                           # 备用线路: GitHub Pages(main 分支推�
 - **注册码池**:`VERIFY_API_BASE=https://whoyouare-five.vercel.app ADMIN_KEY=你的密钥 node scripts/register-codes.mjs hid HY-XXXX-...`(支持 stdin 批量)。码池在服务端(只存哈希),新码随时注册、无需重新构建前端
 - **验证优先级**:服务端核验(绑定设备)→ 未注册(存量旧码)/服务未配置(KV 或 ADMIN_KEY 没配,返回 501)/断网 → 自动回落本地哈希比对,**任何情况都不会把买家挡在门外**
 - **同设备幂等**:买家清缓存/换浏览器后同设备重进仍可解锁;被其他设备占用返回明确提示
-- **开通方式**(三步):Vercel 项目 → Storage → 创建 KV(Marketplace 的 Upstash,环境变量 `KV_REST_API_URL`/`KV_REST_API_TOKEN` 自动注入)→ 环境变量里加 `ADMIN_KEY`(自定义随机串,绝不进代码)。不开通则服务端验证自动关闭,行为与历史版本完全一致
+- **开通方式**:两条路径任选,代码同时认 `KV_REST_API_URL/TOKEN`(Vercel 市场注入)与 `UPSTASH_REDIS_REST_URL/TOKEN`(手动注入,**优先级更高**,用于覆盖失效的市场变量):
+  - 路径 A(市场集成):Vercel 项目 → Storage → 创建 Upstash KV → Connect to Project(前缀填 `KV_REST_API` 或留默认)
+  - 路径 B(手动,推荐,自己的 Upstash 账号看得见库):console.upstash.com 建库(Singapore 区)→ 复制 REST API 区块的 URL/TOKEN(**用复制按钮,手抄易漏字符**)→ Vercel 环境变量加 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`(Secret,Production)
+- **改完变量必须 Redeploy**:Edge 函数在部署时内联环境变量,保存后不重新部署不生效
+- **故障自检**:发码台登录后右上角圆点即真实 PING 探测(绿=通);生成/发货失败时弹窗附 `[详情]`,为 Upstash 原始错误——`HTTP 401`=令牌不对或没吃到新值(再 Redeploy),`WRONGTYPE`=库里存在同名非集合键(去 Data Browser 删除),`HTTP 429`=免费档限流(等一分钟)
+- 市场集成变量上的 "Needs Attention" 黄标为安全提醒(明文可见),不影响功能,可无视
 - **已知边界**:服务端验证只对"注册进码池"的码生效;设备绑定用的是 localStorage 标识,清数据换设备会被判"他设备占用"(客服场景:让买家提供订单,用浏览器开一次同码即知真伪)。纯本地哈希码仍然无法防截图转发——**要防转发就把码注册进码池再售卖**
 
 ### 发码工作台(推荐:零部署发码)
@@ -108,6 +115,7 @@ git push                           # 备用线路: GitHub Pages(main 分支推�
 - **明文码存放于 KV**(`avail:*` 待发队列与 `sent:*` 流水,仅 admin API 可读)——与本地发码工具把明文存 localStorage 同级取舍;买家侧 `verify` 永远接触不到明文,且泄露码仍被"一码一设备"绑定兜底
 - 库存索引:`poolidx:{series}`(累计注册,生成与脚本注册双写)、`actidx:{series}`(已激活,verify 激活成功时写入)
 - 系列扩展:`rl`(关系反应炉)/ `da`(43号档案)已全链路上线(前端页面 + 服务端码池 + 发码台卡片),生成对应系列码即可交付
+- 健壮性:KV 命令失败不再伪装成"重复跳过",直接报 `kv_unreachable` 并附 Upstash 原始错误;流水线走 `/pipeline` 端点并兼容裸数组响应;`ping` 动作做真实 PING 探测而非仅检查变量存在
 - 兼容性:`register-codes.mjs` 脚本照常可用且自动入索引;**此前用旧版脚本注册过的码不在索引里**,重跑一次注册即计入库存
 
 ## 改内容(不用懂代码)
@@ -127,6 +135,8 @@ git push                           # 备用线路: GitHub Pages(main 分支推�
 | 穿越26道题/时间轴文案/陷阱解析 | `src/data/cf.ts` → `CF_QS` |
 | 五档体质判词+甩锅台词 | `src/data/cf.ts` → `CF_TIERS` |
 | 兑换码购买引导文案 | `src/screens/Unlock.tsx` |
+| 关系反应炉题目/环境/元素/反应类型 | `src/data/rl.ts` → `RL_ENVS`(反应环境)/ `rlElement`(活性元素与描述)/ `RL_TYPES`(反应类型) |
+| 43号档案题目/批注/分级/续篇 | `src/data/da.ts` → `DA_BASE` 题库与 `daQuestion` 动态分支 / `daNotes` 批注池 / `DA_TIERS` 分级 / `daSequel` 续篇 |
 
 换标签季度更新的做法:直接改 `HID_LABELS` 里的报告文案和名字(题目不用动),重新部署——这就是"每季度换一批标签"的低成本实现。
 
@@ -141,12 +151,14 @@ git push                           # 备用线路: GitHub Pages(main 分支推�
 
 ## 数据埋点
 
-已接入 Vercel Analytics(主线路自动生效,Pages 线路静默忽略),自定义事件(全部区分 HY/CF/ZH 系列):
+已接入 Vercel Analytics(主线路自动生效,Pages 线路静默忽略),自定义事件(区分五条产品线 ZH/HID/CF/RL/DA):
 
 | 事件 | 触发口径 | 位置 |
 | --- | --- | --- |
-| `quiz_start` | 首题作答(zh/hid)/抽中身份开测(cf)——比进页面更接近意向信号,恢复作答不重复触发 | `Quiz.pick` / `CfFlow` onPick |
-| `quiz_finish` | 答完最后一题、进入生成动画 | `Quiz.finish` / `CfFlow` 完成分支 |
+| `quiz_start` | 首题作答(zh/hid/rl/da)/抽中身份开测(cf)——比进页面更接近意向信号,恢复作答不重复触发 | `Quiz.pick` / `CfFlow` / `RlFlow` / `DaFlow` |
+| `quiz_finish` | 答完最后一题、进入生成动画 | `Quiz.finish` / `CfFlow` / `RlFlow` / `DaFlow` 完成分支 |
+| `rl_env_pick` | 关系反应炉选择反应环境(合测漏斗起点) | `RlFlow` |
+| `da_anomaly` | 43号档案进入"档案异常"态(第4题起) | `DaFlow` |
 | `poster_save` | 点击生成并打开海报(移动端长按保存无法在 web 端探测,打开即最强意向) | `PosterModal` 挂载 |
 | `unlock_success` / `unlock_fail` | 兑换码验证结果;fail 带原因维度(如码被其他设备占用) | `Unlock.submit` |
 
@@ -156,6 +168,7 @@ git push                           # 备用线路: GitHub Pages(main 分支推�
 
 - **穿越款双人合测**:沿站点通用 `?c=` 参数机制扩展
 - **隐藏结局** 已上线:「山顶站岗」(陷阱全踩+指数<20) 与「时代宠儿」(答案哈希命中约1%+指数≥92),判定确定性可复现,见 `src/data/cf.ts` → `cfHiddenEnding`;合测仍在预留池
+- **内容二期候选**(看上线数据决定):全站稀有度徽章(Wrapped 式"全网仅 x% 呈此反应") / 隐藏人格「出厂设置单」格式报告 / 甄嬛圣旨卷轴展开动画 / DA `copy` 事件第四面墙彩蛋
 
 ## 已知取舍
 
