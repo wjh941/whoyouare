@@ -1,14 +1,14 @@
 /* whoyouare · 你是谁测试所 */
 
 :root {
-  --bg: #0e0e12;
-  --card: #1a1a21;
-  --card2: #22222b;
+  --bg: #13131a;
+  --card: #1e1e28;
+  --card2: #272733;
   --ink: #f2efe6;
-  --sub: #9b98a3;
+  --sub: #aeabb9;
   --accent: #ffd166;
   --accent2: #ff6b9d;
-  --line: #2c2c36;
+  --line: #343442;
   --danger: #e5484d;
   --ok: #46a758;
 }
@@ -147,7 +147,7 @@ p { line-height: 1.75; }
 .opt:active { transform: scale(0.98); border-color: var(--accent); }
 .opt .key {
   display: inline-flex; width: 20px; height: 20px; border-radius: 6px; margin-right: 9px;
-  background: var(--card2); color: var(--sub); font-size: 12px; font-weight: 800;
+  background: var(--card2); color: var(--ink); font-size: 12px; font-weight: 800;
   align-items: center; justify-content: center; vertical-align: 1px;
 }
 
@@ -542,7 +542,7 @@ p { line-height: 1.75; }
 .p-vs { align-self: center; font-weight: 900; color: var(--accent); font-size: 14px; flex: none; }
 
 /* ---------- 三世界主题 · 甄嬛传（宫墙红 / 墨 / 金） ---------- */
-.theme-zh { background: radial-gradient(1100px 480px at 50% -8%, #3a1616 0%, #141414 62%) fixed; }
+.theme-zh { background: radial-gradient(1100px 480px at 50% -8%, #481b1b 0%, rgba(72,27,27,0) 62%), radial-gradient(1100px 620px at 50% 112%, #2c1c22 0%, #191519 58%) fixed; }
 .theme-zh .q-card, .theme-zh .section { background: linear-gradient(160deg, rgba(58,22,22,.4), rgba(26,16,16,.94)); border-color: rgba(122,64,48,.6); }
 .theme-zh .opt { background: linear-gradient(160deg, rgba(122,46,46,.22), rgba(26,16,16,.55)); border-color: #6b3a2a; }
 .theme-zh .opt.sel { border-color: var(--accent); background: rgba(245,197,66,.1); }
@@ -551,14 +551,14 @@ p { line-height: 1.75; }
 .theme-zh .progress-label span:first-child { color: #e8b06a; }
 
 /* ---------- 三世界主题 · 穿越（复古账本 / 褐金 / 票据） ---------- */
-.theme-cf { background: radial-gradient(1100px 480px at 50% -8%, #2a1f0e 0%, #141210 62%) fixed; }
+.theme-cf { background: radial-gradient(1100px 480px at 50% -8%, #372812 0%, rgba(55,40,18,0) 62%), radial-gradient(1100px 620px at 50% 112%, #251d10 0%, #191611 58%) fixed; }
 .theme-cf .q-card, .theme-cf .section { background: linear-gradient(160deg, rgba(42,31,14,.5), rgba(22,18,10,.95)); border-color: #5a4a1c; }
 .theme-cf .opt { background: linear-gradient(160deg, rgba(90,74,28,.18), rgba(22,18,10,.5)); border-color: #6b5426; border-style: dashed; }
 .theme-cf .opt.sel { border-color: var(--accent); border-style: solid; background: rgba(245,197,66,.1); }
 .theme-cf .q-sub, .theme-cf .s-title { color: #d9b96a; }
 
 /* ---------- 三世界主题 · 隐藏人格（深夜档案室 / 蓝紫 / 解密） ---------- */
-.theme-hid { background: radial-gradient(1000px 460px at 50% -8%, #101c33 0%, #0e0e14 64%) fixed; }
+.theme-hid { background: radial-gradient(1000px 460px at 50% -8%, #172747 0%, rgba(23,39,71,0) 62%), radial-gradient(1000px 600px at 50% 112%, #18203a 0%, #13141f 58%) fixed; }
 .theme-hid .q-card, .theme-hid .section { background: linear-gradient(160deg, rgba(20,30,52,.55), rgba(13,16,28,.95)); border-color: #24334f; }
 .theme-hid .opt { background: linear-gradient(160deg, rgba(28,44,80,.28), rgba(13,16,28,.5)); border-color: #2c3f66; }
 .theme-hid .opt.sel { border-color: #7ea8ff; background: rgba(90,140,255,.12); }
@@ -686,7 +686,11 @@ body { letter-spacing: .015em; }
 .shadow-card { border-left: 3px solid var(--danger); background: var(--card2); border-radius: 0 12px 12px 0; padding: 12px 14px; }
 
 /* ==================== 关系反应炉 · 深夜实验室(theme-rl) ==================== */
-.theme-rl { background: radial-gradient(1100px 480px at 50% -8%, #2a1220 0%, #141117 62%) fixed; }
+.theme-rl { background:
+  repeating-linear-gradient(0deg, rgba(74,214,197,.028) 0 1px, transparent 1px 44px),
+  repeating-linear-gradient(90deg, rgba(74,214,197,.028) 0 1px, transparent 1px 44px),
+  radial-gradient(1100px 480px at 50% -8%, #371a2c 0%, rgba(55,26,44,0) 62%),
+  radial-gradient(1100px 620px at 50% 112%, #2a1424 0%, #1a151e 58%) fixed; }
 .theme-rl .q-card, .theme-rl .section { background: linear-gradient(160deg, rgba(58,26,48,.45), rgba(22,16,24,.95)); border-color: #5a3050; }
 .theme-rl .opt { background: linear-gradient(160deg, rgba(90,48,80,.2), rgba(22,16,24,.55)); border-color: #6b3a5a; }
 .theme-rl .opt.sel { border-color: #4ad6c5; background: rgba(74,214,197,.1); }
@@ -762,11 +766,12 @@ body { letter-spacing: .015em; }
 }
 
 /* ==================== 第43号档案 · 磷光终端(theme-da) ==================== */
-.theme-da { background: radial-gradient(1100px 480px at 50% -8%, #0a2414 0%, #060d09 62%) fixed; }
+.theme-da { background: radial-gradient(1100px 480px at 50% -8%, #103c22 0%, rgba(16,60,34,0) 62%), radial-gradient(1100px 620px at 50% 112%, #0e2416 0%, #0b150e 58%) fixed; }
 .theme-da::before {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 40;
-  background: repeating-linear-gradient(0deg, rgba(57,255,107,.05) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(0deg, rgba(57,255,107,.034) 0 1px, transparent 1px 3px);
 }
+.theme-da .progress-label { color: #9df5bb; }
 .theme-da .q-card, .theme-da .section { background: linear-gradient(160deg, rgba(14,42,24,.5), rgba(8,16,11,.95)); border-color: #1d4030; }
 .theme-da .opt { background: linear-gradient(160deg, rgba(29,64,48,.25), rgba(8,16,11,.6)); border-color: #245038; }
 .theme-da .opt.sel { border-color: #39ff6b; background: rgba(57,255,107,.09); }
