@@ -274,6 +274,26 @@ p { line-height: 1.75; }
 .code-input:focus { border-color: var(--accent); }
 .unlock-err { color: var(--danger); font-size: 12.5px; margin-top: 10px; text-align: center; min-height: 18px; }
 
+/* 面包多自动解锁卡:主题色随款切换(--a 由 Unlock.tsx 内联注入) */
+.mbd-card {
+  background: var(--a-bg); border: 1px solid var(--a-line); border-radius: 20px;
+  padding: 22px 20px; margin-top: 14px;
+}
+.mbd-card .mbd-head { display: flex; align-items: center; gap: 8px; }
+.mbd-card h2 { font-size: 18px; color: var(--a); }
+.mbd-badge {
+  font-size: 11px; letter-spacing: 2px; color: var(--a);
+  border: 1px solid var(--a-line); border-radius: 999px; padding: 2px 9px; white-space: nowrap;
+}
+.mbd-card .hint { color: var(--sub); font-size: 12.5px; line-height: 1.7; margin: 8px 0 14px; }
+.mbd-go { display: block; width: 100%; text-align: center; }
+.mbd-row { display: flex; gap: 8px; margin-top: 10px; }
+.mbd-row .code-input {
+  flex: 1 1 0%; width: auto; min-width: 0; text-align: left; letter-spacing: 0;
+  font-size: 15px; padding: 13px 14px; border-color: var(--a-line);
+}
+.mbd-row .btn { width: auto; flex: 0 0 auto; white-space: nowrap; }
+
 .cp-card {
   margin-top: 16px; border-radius: 18px; padding: 18px;
   background: linear-gradient(160deg, rgba(255,107,157,0.14), rgba(255,107,157,0.05));
