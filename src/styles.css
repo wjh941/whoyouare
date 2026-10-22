@@ -132,7 +132,7 @@ p { line-height: 1.75; }
 
 .q-card {
   margin-top: 22px; background: var(--card); border: 1px solid var(--line);
-  border-radius: 20px; padding: 22px 20px;
+  border-radius: 20px; padding: 22px 20px; position: relative;
 }
 .q-card .q-sub { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
 .q-card .q-text { font-size: 18px; font-weight: 800; line-height: 1.6; }
@@ -866,3 +866,43 @@ body:has(.theme-home) { background: #f3efe4; }
 .theme-home .entry.da .badge { color: #1f8a45; border-color: rgba(31,138,69,.35); background: rgba(31,138,69,.07); }
 .theme-home .entry.rl .go { color: #17877a; }
 .theme-home .entry.da .go { color: #1f8a45; }
+
+/* ---------- 边框与交互手感(技法学自 Hover.css / Codrops,按五款主题改写) ---------- */
+/* 1. 选项发牌:每题选项级联入场,像被一张张发到手里 */
+.opts.slide-in .opt { animation: optDeal .34s cubic-bezier(.22,1,.36,1) both; }
+.opts.slide-in .opt:nth-child(1) { animation-delay: .02s; }
+.opts.slide-in .opt:nth-child(2) { animation-delay: .09s; }
+.opts.slide-in .opt:nth-child(3) { animation-delay: .16s; }
+.opts.slide-in .opt:nth-child(4) { animation-delay: .23s; }
+@keyframes optDeal { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+/* 2. 按压手感:物理下沉(push 改写) */
+.opt:active { transform: scale(.97) translateY(1px); }
+.btn:active { transform: translateY(1px) scale(.98); }
+/* 3. 选中弹性 pop */
+.opt.sel { animation: selPop .3s cubic-bezier(.34,1.56,.64,1); }
+@keyframes selPop { 0% { transform: scale(1); } 45% { transform: scale(1.025); } 100% { transform: scale(1); } }
+/* 4. 主按钮扫光(sweep 改写:只出现在主动作按压的一瞬) */
+.btn.primary { position: relative; overflow: hidden; }
+.btn.primary::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -70%; width: 45%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+}
+.btn.primary:active::after { animation: btnSheen .55s ease; }
+@keyframes btnSheen { from { left: -70%; } to { left: 135%; } }
+/* 5. 桌面端 hover:边框提亮 + 浮起(border-fade 改写;手机端无 hover 不受影响) */
+.entry { transition: transform .18s ease, box-shadow .18s ease; }
+@media (hover: hover) {
+  .opt:hover { border-color: var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+  .entry:hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(0,0,0,.28); }
+}
+/* 6. 主题边框签名:边框讲世界观 */
+.theme-zh .q-card, .theme-zh .section { outline: 1px solid rgba(232,176,106,.3); outline-offset: 3px; }
+.theme-rl .q-card::before, .theme-rl .q-card::after {
+  content: ''; position: absolute; width: 14px; height: 14px; pointer-events: none;
+  border-color: rgba(74,214,197,.55); border-style: solid;
+}
+.theme-rl .q-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 14px 0 0 0; }
+.theme-rl .q-card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 14px 0; }
+.theme-da .opt.sel { box-shadow: 0 0 18px rgba(57,255,107,.35), inset 0 0 12px rgba(57,255,107,.12); }
+.theme-hid .q-card, .theme-hid .section { box-shadow: 0 14px 34px rgba(0,0,0,.22), 0 0 26px rgba(91,141,239,.14); }
