@@ -18,14 +18,20 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
 
   useEffect(() => { if (!valid) nav('/') }, [valid])
 
-  // 第四面墙:管理员的目光(右键 / 切走 / 复制 / 阅毕 / 重访 / 静止 / 保存,各一次)
+  // 第四面墙:管理员的目光(右键 / 切走 / 复制 / 阅毕 / 重访 / 静止 / 保存)
+  // 密度控制(学自 Konami 传统):触发器多,配额少——每次会话最多出现 2 条,才像档案在挑时机说话
   const [whisper, setWhisper] = useState('')
-  const said = useRef({ ctx: false, save: false, away: false, copy: false, end: false, idle: false })
+  const said = useRef({ ctx: false, save: false, away: false, copy: false, end: false, idle: false, revisit: false })
   useEffect(() => {
     if (!valid) return
-    const say = (key: 'ctx' | 'away' | 'copy' | 'end' | 'idle', msg: string) => {
+    const say = (key: 'ctx' | 'away' | 'copy' | 'end' | 'idle' | 'revisit', msg: string) => {
       if (said.current[key]) return
       said.current[key] = true
+      try {
+        const used = Number(sessionStorage.getItem('wy_da_whisper') || '0')
+        if (used >= 2) return
+        sessionStorage.setItem('wy_da_whisper', String(used + 1))
+      } catch { /* ignore */ }
       setWhisper(msg)
     }
     const onCtx = () => say('ctx', '管理员已注意到你的右键。检查源码,也找不到这份档案的边界。')
@@ -46,7 +52,7 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
       const n = Number(localStorage.getItem('wy_da_open') || '0') + 1
       localStorage.setItem('wy_da_open', String(n))
       if (n >= 2) window.setTimeout(() => {
-        setWhisper(`本档案已被第 ${n} 次调阅。管理员没有想念,只是记性好。`)
+        say('revisit', `本档案已被第 ${n} 次调阅。管理员没有想念,只是记性好。`)
       }, 1100)
     } catch { /* ignore */ }
     // 静止 30 秒:档案假设你在思考
@@ -54,7 +60,7 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
     const armIdle = () => {
       window.clearTimeout(idleTimer)
       if (said.current.idle) return
-      idleTimer = window.setTimeout(() => say('idle', '样本已静止 30 秒。档案假设你在思考,管理员假设你在犹豫要不要分享。'), 30000)
+      idleTimer = window.setTimeout(() => say('idle', '样本已静止 45 秒。档案假设你在思考,管理员假设你在犹豫要不要分享。'), 45000)
     }
     const wake = () => armIdle()
     document.addEventListener('contextmenu', onCtx)
