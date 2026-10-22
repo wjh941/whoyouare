@@ -52,7 +52,9 @@ export default function App() {
             ? 'rl'
             : path === '/quiz/da' || path === '/result/da'
               ? 'da'
-              : ''
+              : path === '/' || path === ''
+                ? 'home'
+                : ''
 
   return (
     <div className={`shell${theme ? ` theme-${theme}` : ''}`}>

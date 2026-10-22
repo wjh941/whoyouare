@@ -833,3 +833,36 @@ body { letter-spacing: .015em; }
 .da-escaped .es-sub { color: #d9a8a8; font-size: 12px; margin-top: 4px; font-family: ui-monospace, Consolas, monospace; }
 .escaped .da-escaped { animation: esShake .5s ease; }
 @keyframes esShake { 0% { transform: translateX(0); } 25% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
+
+/* ---------- 门户 · 浅暖纸感(大堂亮堂,包厢才有氛围) ---------- */
+body:has(.theme-home) { background: #f3efe4; }
+.theme-home {
+  color: var(--ink);
+  --bg: #f3efe4;
+  --card: #fffdf7;
+  --card2: #ece5d4;
+  --ink: #2a2532;
+  --sub: #736e7c;
+  --line: #e0d8c6;
+  --accent: #8a6a1f;
+  --accent2: #d4507e;
+  background:
+    radial-gradient(900px 420px at 50% -10%, #fdf7ea 0%, rgba(253,247,234,0) 60%),
+    linear-gradient(180deg, #f4f0e5 0%, #efe9db 100%) fixed;
+}
+.theme-home .entry { border-color: #d9cfb8; }
+.theme-home .entry.zh { background: linear-gradient(160deg, #fdf3e7 0%, #f6e9d8 100%); border-color: #d9b98a; }
+.theme-home .entry.hid { background: linear-gradient(160deg, #eef3fc 0%, #e3eaf8 100%); border-color: #b9c8e8; }
+.theme-home .entry.cf { background: linear-gradient(160deg, #faf3dd 0%, #f3ead0 100%); border-color: #d3bd82; }
+.theme-home .entry.rl { background: linear-gradient(160deg, #fceef4 0%, #f7e4ed 100%); border-color: #e3b3c9; }
+.theme-home .entry.da { background: linear-gradient(160deg, #e9f6ec 0%, #dfefe3 100%); border-color: #a8d6b3; }
+.theme-home .entry .desc { color: #6f6a78; }
+.theme-home .entry.zh .desc { color: #7a5c2e; }
+.theme-home .entry.rl .desc { color: #a04a70; }
+.theme-home .entry.da .desc { color: #3f7a4e; }
+.theme-home .entry.hid .badge { color: #3d6bc4; border-color: rgba(61,107,196,.35); background: rgba(61,107,196,.07); }
+.theme-home .entry.cf .badge { color: #8a6a10; border-color: rgba(138,106,16,.35); background: rgba(138,106,16,.07); }
+.theme-home .entry.rl .badge { color: #c04a78; border-color: rgba(192,74,120,.35); background: rgba(192,74,120,.07); }
+.theme-home .entry.da .badge { color: #1f8a45; border-color: rgba(31,138,69,.35); background: rgba(31,138,69,.07); }
+.theme-home .entry.rl .go { color: #17877a; }
+.theme-home .entry.da .go { color: #1f8a45; }
