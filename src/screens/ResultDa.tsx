@@ -26,12 +26,12 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
     const onCtx = () => {
       if (said.current.ctx) return
       said.current.ctx = true
-      setWhisper('管理员已注意到你的右键。检查源码,也找不到这份档案的边界。')
+      setWhisper('偷看源码是没用的。这份档案的边界,连管理员自己都没找到。')
     }
     const onVis = () => {
       if (!document.hidden || said.current.away) return
       said.current.away = true
-      setWhisper('你刚才离开了。管理员数了。是 43 秒。')
+      setWhisper('档案显示你刚离开了 43 秒。它数着玩,不计仇。')
     }
     document.addEventListener('contextmenu', onCtx)
     document.addEventListener('visibilitychange', onVis)
@@ -70,7 +70,7 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
   const savePoster = () => {
     if (!said.current.save) {
       said.current.save = true
-      setWhisper('管理员已注意到你正在保存这份档案。传播行为已被记录。大概。')
+      setWhisper('档案已批准本次传播。发出去的时候,记得亮出你的异常指数。')
     }
     setPoster(renderDAPoster({
       index: r.index, tier: r.tier, note: freeNotes[0]?.text || '', fileNo: r.fileNo, hidden: r.hidden
