@@ -18,26 +18,60 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
 
   useEffect(() => { if (!valid) nav('/') }, [valid])
 
-  // 第四面墙:管理员的目光(右键 / 切走 / 保存档案,各一次)
+  // 第四面墙:管理员的目光(右键 / 切走 / 复制 / 阅毕 / 重访 / 静止 / 保存,各一次)
   const [whisper, setWhisper] = useState('')
-  const said = useRef({ ctx: false, save: false, away: false })
+  const said = useRef({ ctx: false, save: false, away: false, copy: false, end: false, idle: false })
   useEffect(() => {
     if (!valid) return
-    const onCtx = () => {
-      if (said.current.ctx) return
-      said.current.ctx = true
-      setWhisper('偷看源码是没用的。这份档案的边界,连管理员自己都没找到。')
+    const say = (key: 'ctx' | 'away' | 'copy' | 'end' | 'idle', msg: string) => {
+      if (said.current[key]) return
+      said.current[key] = true
+      setWhisper(msg)
     }
+    const onCtx = () => say('ctx', '管理员已注意到你的右键。检查源码,也找不到这份档案的边界。')
     const onVis = () => {
-      if (!document.hidden || said.current.away) return
-      said.current.away = true
-      setWhisper('档案显示你刚离开了 43 秒。它数着玩,不计仇。')
+      if (!document.hidden) return
+      say('away', '你刚才离开了。管理员数了。是 43 秒。')
     }
+    const onCopy = () => say('copy', '复制行为已记录。样本对档案的兴趣,超出常规样本。')
+    const onScroll = () => {
+      const bottom = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+      if (window.innerHeight + window.scrollY >= bottom - 40) {
+        window.removeEventListener('scroll', onScroll)
+        say('end', '已阅至档案末尾。完整阅读行为,管理员表示罕见认可。')
+      }
+    }
+    // 重访:同一台设备第 N 次调阅
+    try {
+      const n = Number(localStorage.getItem('wy_da_open') || '0') + 1
+      localStorage.setItem('wy_da_open', String(n))
+      if (n >= 2) window.setTimeout(() => {
+        setWhisper(`本档案已被第 ${n} 次调阅。管理员没有想念,只是记性好。`)
+      }, 1100)
+    } catch { /* ignore */ }
+    // 静止 30 秒:档案假设你在思考
+    let idleTimer = 0
+    const armIdle = () => {
+      window.clearTimeout(idleTimer)
+      if (said.current.idle) return
+      idleTimer = window.setTimeout(() => say('idle', '样本已静止 30 秒。档案假设你在思考,管理员假设你在犹豫要不要分享。'), 30000)
+    }
+    const wake = () => armIdle()
     document.addEventListener('contextmenu', onCtx)
     document.addEventListener('visibilitychange', onVis)
+    document.addEventListener('copy', onCopy)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('pointerdown', wake, { passive: true })
+    window.addEventListener('keydown', wake)
+    armIdle()
     return () => {
+      window.clearTimeout(idleTimer)
       document.removeEventListener('contextmenu', onCtx)
       document.removeEventListener('visibilitychange', onVis)
+      document.removeEventListener('copy', onCopy)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('pointerdown', wake)
+      window.removeEventListener('keydown', wake)
     }
   }, [valid])
 
@@ -70,7 +104,7 @@ export default function ResultDa({ params }: { params: URLSearchParams }) {
   const savePoster = () => {
     if (!said.current.save) {
       said.current.save = true
-      setWhisper('档案已批准本次传播。发出去的时候,记得亮出你的异常指数。')
+      setWhisper('管理员已注意到你正在保存这份档案。传播行为已被记录。大概。')
     }
     setPoster(renderDAPoster({
       index: r.index, tier: r.tier, note: freeNotes[0]?.text || '', fileNo: r.fileNo, hidden: r.hidden
