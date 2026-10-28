@@ -6,6 +6,7 @@ import { enc, nav } from '../lib/share'
 import { TestId } from '../data/types'
 import { ProgressCells } from '../components/ui'
 import GenLoading from '../components/GenLoading'
+import { saveSharedResult } from '../lib/shared-archive'
 
 function buzz() {
   try { navigator.vibrate && navigator.vibrate(8) } catch { /* ignore */ }
@@ -54,6 +55,11 @@ export default function Quiz({ testId, params }: { testId: TestId; params: URLSe
   const finish = (final: number[]) => {
     finalRef.current = final
     save(final)
+    const seriesName = testId === 'zh' ? '甄嬛传宫斗命格' : testId === 'hid' ? '隐藏人格测试' : testId
+    try {
+      const { saveSharedResult } = require('../lib/shared-archive')
+      saveSharedResult('whoyouare', seriesName, seriesName + ' · ' + new Date().toISOString().slice(0, 10))
+    } catch { /* ignore */ }
     try { track('quiz_finish', { series: testId }) } catch { /* ignore */ }
     setShowGen(true)
   }
